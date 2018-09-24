@@ -1,0 +1,3 @@
+FROM eu.gcr.io/staging-205711/datascience-internal-all:latest
+
+RUN conda install pytorch-cpu torchvision-cpu -c pytorch

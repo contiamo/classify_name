@@ -1,0 +1,8 @@
+api_version: 0.0.2
+name: pytorch_name_classification
+edit:
+  image: eu.gcr.io/staging-205711/datascience-internal-all-pytorch
+functions:
+  classify_name:
+    lang: dockerfile
+    handler: /functions/classify_name

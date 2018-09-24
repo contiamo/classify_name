@@ -3,6 +3,7 @@ import importlib
 import json
 import os
 import torch
+import typing 
 
 from common import utils
 from pathlib import PurePath
@@ -19,7 +20,7 @@ RNN = utils.RNN
 rnn = torch.load(str(PurePath(bundle_root, 'data/processed/char-rnn-classification.pt')))
 
 
-def predict(line, n_predictions=3):
+def predict(line: str, n_predictions: int=3) ->str:
     output = utils.evaluate(Variable(utils.lineToTensor(line)), rnn)
 
     # Get top N categories
@@ -34,20 +35,16 @@ def predict(line, n_predictions=3):
     return predictions
         
 
-def handle(input_json: str) -> None:
+def handle(input_string: str) -> None:
     # handle empty input
-    if not input_json:
+    if not input_string:
         return 'No input provided'
-    # parse input
-    input_dict = json.loads(input_json)
-    if 'name' in input_dict.keys():
-        name = input_dict['name']
     else:
-        name = None       
-   
+        name = input_string
+
     output = predict(name) 
     
-    return output #json.dumps(output, ensure_ascii=False)
+    return json.dumps(output, ensure_ascii=False)
 
 
 

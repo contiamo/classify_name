@@ -1,3 +1,10 @@
 FROM eu.gcr.io/staging-205711/datascience-internal-all:latest
 
+USER root
+RUN pip install --upgrade pip
 RUN conda install pytorch-cpu torchvision-cpu -c pytorch
+RUN pip install keras
+RUN pip install tensorflow
+RUN pip install mmdnn
+RUN pip install onnx-tf
+USER jovyan

@@ -45,7 +45,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
 ENV CONDA_DIR="/opt/conda"
 ENV PATH="$CONDA_DIR/bin:$PATH"
 
-# Install conda
+# Install miniconda
 RUN CONDA_VERSION="4.5.4" && \
     CONDA_MD5_CHECKSUM="a946ea1d0c4a642ddf0c3a26a18bb16d" && \
     \
@@ -69,26 +69,6 @@ RUN CONDA_VERSION="4.5.4" && \
 
 #RUN conda install -c caffe2 caffe2
 RUN conda install pytorch-cpu -c pytorch
-
-# # Install packages necessary for pytorch
-# RUN echo "|--> Updating" \
-#     && apk update && apk upgrade \
-#     && echo http://dl-cdn.alpinelinux.org/alpine/edge/main | tee /etc/apk/repositories \
-#     && echo http://dl-cdn.alpinelinux.org/alpine/edge/testing | tee -a /etc/apk/repositories \
-#     && echo http://dl-cdn.alpinelinux.org/alpine/edge/community | tee -a /etc/apk/repositories \
-#     && echo "|--> Install basics pre-requisites" \
-#     && apk add --no-cache tini \
-#     curl ca-certificates python3 py3-numpy py3-numpy-f2py \
-#     freetype jpeg libpng libstdc++ libgomp graphviz font-noto \
-#     && echo "|--> Install build dependencies" \
-#     && apk add --no-cache --virtual=.build-deps \
-#     build-base linux-headers python3-dev git cmake jpeg-dev bash \
-#     libffi-dev gfortran openblas-dev py-numpy-dev freetype-dev libpng-dev \
-#     && echo "|--> Cleaning" \
-#     && rm -rf /root/.cache \
-#     && rm -rf /root/.[acpw]* \
-#     && rm -rf /var/cache/apk/* \
-#     && echo "|--> Done!"
 
 # Get watchdog
 RUN echo "|--> Pulling watchdog binary from Github" \

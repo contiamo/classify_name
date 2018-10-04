@@ -80,28 +80,28 @@ RUN echo "|--> Pulling watchdog binary from Github" \
 
 WORKDIR /labs/bundle
 # Install python dependencies
-COPY common /labs/bundle/common
-RUN pip install -r common/requirements.txt
+# COPY common /labs/bundle/common
+# RUN pip install -r common/requirements.txt
 
-# Copy over files
-WORKDIR /labs/bundle
-COPY index.py .
-COPY handler.py .
-# remove gcc
-#
-## Set environment variables
-ENV fprocess="python index.py"
-ENV cgi_headers="true"
-ENV mode="http"
-ENV upstream_url="http://127.0.0.1:5000"
-ENV LABS_BUNDLE_ROOT='/labs/bundle'
-#
-HEALTHCHECK --interval=1s CMD [ -e /tmp/.handlelock ] || exit 1
-#
-#
-## Add data processed folder (create first)
-RUN mkdir -p /labs/bundle/data/processed/
+# # Copy over files
+# WORKDIR /labs/bundle
+# COPY index.py .
+# COPY handler.py .
+# # remove gcc
+# #
+# ## Set environment variables
+# ENV fprocess="python index.py"
+# ENV cgi_headers="true"
+# ENV mode="http"
+# ENV upstream_url="http://127.0.0.1:5000"
+# ENV LABS_BUNDLE_ROOT='/labs/bundle'
+# #
+# HEALTHCHECK --interval=1s CMD [ -e /tmp/.handlelock ] || exit 1
+# #
+# #
+# ## Add data processed folder (create first)
+# RUN mkdir -p /labs/bundle/data/processed/
 
-#
-##CMD ["python index.py"]
-CMD ["fwatchdog"]
+# #
+# ##CMD ["python index.py"]
+# CMD ["fwatchdog"]

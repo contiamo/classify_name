@@ -1,107 +1,55 @@
-FROM alpine:3.8
+FROM debian:stable-slim
 
-ENV LANG=C.UTF-8
 
-# Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
+RUN apt-get update && apt-get -qq -y install curl bzip2 \
+    && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
+    && bash /tmp/miniconda.sh -bfp /usr/local \
+    && rm -rf /tmp/miniconda.sh \
+    && conda install -y python=3 \
+    && conda update conda \
+    && apt-get -qq -y remove curl bzip2 \
+    && apt-get -qq -y autoremove \
+    && apt-get autoclean \
+    && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
+    && conda clean --all --yes
 
-RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-    ALPINE_GLIBC_PACKAGE_VERSION="2.28-r0" && \
-    ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
-    echo \
-    "-----BEGIN PUBLIC KEY-----\
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ2u1KJKUu/fW4A25y9m\
-    y70AGEa/J3Wi5ibNVGNn1gT1r0VfgeWd0pUybS4UmcHdiNzxJPgoWQhV2SSW1JYu\
-    tOqKZF5QSN6X937PTUpNBjUvLtTQ1ve1fp39uf/lEXPpFpOPL88LKnDBgbh7wkCp\
-    m2KzLVGChf83MS0ShL6G9EQIAUxLm99VpgRjwqTQ/KfzGtpke1wqws4au0Ab4qPY\
-    KXvMLSPLUp7cfulWvhmZSegr5AdhNw5KNizPqCJT8ZrGvgHypXyiFvvAH5YRtSsc\
-    Zvo9GI2e2MaZyo9/lvb+LbLEJZKEQckqRj4P26gmASrZEPStwc+yqy1ShHLA0j6m\
-    1QIDAQAB\
-    -----END PUBLIC KEY-----" | sed 's/   */\n/g' > "/etc/apk/keys/sgerrand.rsa.pub" && \
-    wget \
-    "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-    apk add --no-cache \
-    "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-    \
-    rm "/etc/apk/keys/sgerrand.rsa.pub" && \
-    /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 "$LANG" || true && \
-    echo "export LANG=$LANG" > /etc/profile.d/locale.sh && \
-    \
-    apk del glibc-i18n && \
-    \
-    rm "/root/.wget-hsts" && \
-    apk del .build-dependencies && \
-    rm \
-    "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-    "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
-
-ENV CONDA_DIR="/opt/conda"
-ENV PATH="$CONDA_DIR/bin:$PATH"
-
-# Install miniconda
-RUN CONDA_VERSION="4.5.4" && \
-    CONDA_MD5_CHECKSUM="a946ea1d0c4a642ddf0c3a26a18bb16d" && \
-    \
-    apk add --no-cache --virtual=.build-dependencies wget ca-certificates bash && \
-    \
-    mkdir -p "$CONDA_DIR" && \
-    wget "http://repo.continuum.io/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh" -O miniconda.sh && \
-    echo "$CONDA_MD5_CHECKSUM  miniconda.sh" | md5sum -c && \
-    bash miniconda.sh -f -b -p "$CONDA_DIR" && \
-    echo "export PATH=$CONDA_DIR/bin:\$PATH" > /etc/profile.d/conda.sh && \
-    rm miniconda.sh && \
-    \
-    conda update --all --yes && \
-    conda config --set auto_update_conda False && \
-    rm -r "$CONDA_DIR/pkgs/" && \
-    \
-    apk del --purge .build-dependencies && \
-    \
-    mkdir -p "$CONDA_DIR/locks" && \
-    chmod 777 "$CONDA_DIR/locks"
+ENV PATH /opt/conda/bin:$PATH
 
 #RUN conda install -c caffe2 caffe2
 RUN conda install pytorch-cpu -c pytorch
 
 # Get watchdog
 RUN echo "|--> Pulling watchdog binary from Github" \
-    && apk --no-cache add curl \
+    && apt-get update \
+    && apt-get install -y curl \
     && curl -sSL https://github.com/openfaas/faas/releases/download/0.8.10/fwatchdog > /usr/bin/fwatchdog \
-    && chmod +x /usr/bin/fwatchdog  \
-    && apk del curl
+    && chmod +x /usr/bin/fwatchdog  
 
 
 WORKDIR /labs/bundle
 # Install python dependencies
-# COPY common /labs/bundle/common
-# RUN pip install -r common/requirements.txt
+COPY common /labs/bundle/common
+RUN pip install -r common/requirements.txt
 
-# # Copy over files
-# WORKDIR /labs/bundle
-# COPY index.py .
-# COPY handler.py .
-# # remove gcc
-# #
-# ## Set environment variables
-# ENV fprocess="python index.py"
-# ENV cgi_headers="true"
-# ENV mode="http"
-# ENV upstream_url="http://127.0.0.1:5000"
-# ENV LABS_BUNDLE_ROOT='/labs/bundle'
-# #
-# HEALTHCHECK --interval=1s CMD [ -e /tmp/.handlelock ] || exit 1
-# #
-# #
-# ## Add data processed folder (create first)
-# RUN mkdir -p /labs/bundle/data/processed/
+# Copy over files
+WORKDIR /labs/bundle
+COPY index.py .
+COPY handler.py .
+# remove gcc
+#
+## Set environment variables
+ENV fprocess="python index.py"
+ENV cgi_headers="true"
+ENV mode="http"
+ENV upstream_url="http://127.0.0.1:5000"
+ENV LABS_BUNDLE_ROOT='/labs/bundle'
+#
+HEALTHCHECK --interval=1s CMD [ -e /tmp/.handlelock ] || exit 1
+#
+#
+## Add data processed folder (create first)
+RUN mkdir -p /labs/bundle/data/processed/
 
-# #
-# ##CMD ["python index.py"]
-# CMD ["fwatchdog"]
+#
+##CMD ["python index.py"]
+CMD ["fwatchdog"]

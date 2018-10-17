@@ -22,7 +22,9 @@ def main_route():
     logger.debug("running main_route")
     try:
         print('Calling handler')
-        ret = handler.handle(request.get_data())
+        data = request.get_data()
+        print(data, type(data), request.data, request.get_json(), request.form, str(data))
+        ret = handler.handle(str(data))
         return ret
     except Exception as e:
         # get all error arguments as strings

@@ -22,22 +22,34 @@ rnn = RNN(utils.n_letters, utils.n_hidden, utils.n_categories)
 rnn.load_state_dict(torch.load(str(PurePath(bundle_root, 'common/char-rnn-classification.pt'))))
 
 def predict(line: str, n_predictions: int=3) -> List[Any]:
-    output = utils.evaluate(Variable(utils.lineToTensor(line)), rnn)
+    with torch.no_grad():
+        output = utils.evaluate(utils.lineToTensor(line), rnn)
 
-    # Get top N categories
-    topv, topi = output.data.topk(n_predictions, 1, True)
-    predictions: List[Any] = []
+        # Get top N categories
+        topv, topi = output.topk(n_predictions, 1, True)
+        predictions = []
 
-    for i in range(n_predictions):
-        value = topv[0][i]
-        category_index = topi[0][i]
-        predictions += [(str(value).split('tensor')[1], utils.all_categories[category_index])]
+        for i in range(n_predictions):
+            value = topv[0][i].item()
+            category_index = topi[0][i].item()
+            #print('(%.2f) %s' % (value, utils.all_categories[category_index]))
+            predictions.append([value, utils.all_categories[category_index]])
+    #output = utils.evaluate(utils.lineToTensor(line), rnn)
 
+    ## Get top N categories
+    #topv, topi = output.data.topk(n_predictions, 1, True)
+    #predictions: List[Any] = []
+
+    #for i in range(n_predictions):
+    #    value = topv[0][i]
+    #    category_index = topi[0][i]
+    #    predictions += [(str(value).split('tensor')[1], utils.all_categories[category_index])]
+    predictions.reverse()
     return predictions
         
 
 def handle(input_string: str) -> str:
-    print('Input string is {} and type is {}'.format(input_string, type(input_string)))
+    #print('Input string is {} and type is {}'.format(input_string, type(input_string)))
     # handle empty input
     if not input_string:
         return 'No input provided'
@@ -46,7 +58,7 @@ def handle(input_string: str) -> str:
 
     output = predict(name) 
     
-    return json.dumps(output)
+    return json.dumps(dict(output))
 
 
 

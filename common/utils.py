@@ -86,4 +86,3 @@ def add_this(a: int, b: int) -> int:
     return a + b
 
 
-add_this('jjkj', 'klj')

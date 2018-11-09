@@ -37,15 +37,16 @@ def predict(line: str, n_predictions: int=3) -> List[Any]:
         
 
 def handle(input_string: str) -> str:
+    print('Input string is {} and type is {}'.format(input_string, type(input_string)))
     # handle empty input
     if not input_string:
         return 'No input provided'
     else:
-        name = input_string
+        name = str(input_string)
 
     output = predict(name) 
     
-    return json.dumps(output, ensure_ascii=False)
+    return json.dumps(output)
 
 
 

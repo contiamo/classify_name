@@ -18,11 +18,8 @@ print('Server starting')
 
 @app.route("/", methods=["POST", "GET"])
 def main_route():
-    print('Calling handler')
     data = request.get_data()
-    print(data, type(data), request.data, request.get_json(), request.form, str(data))
     ret = handler.handle(data)
-    print('Output from function is {}'.format(ret))
     return ret
 
 

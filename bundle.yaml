@@ -1,7 +1,7 @@
 api_version: 0.0.2
 name: pytorch_name_classification
 edit:
-  image: eu.gcr.io/contiamo-prod/datascience-internal-all-deep
+  image: eu.gcr.io/contiamo-prod/datascience-internal-all-deep:latest
 functions:
   classify_name:
     lang: dockerfile

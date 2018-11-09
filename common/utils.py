@@ -14,24 +14,24 @@ n_hidden = 128
 
 # Build the category_lines dictionary, a list of names per language
 
-all_categories = ['German',
-                  'English',
-                  'Czech',
-                  'Portuguese',
-                  'Japanese',
-                  'Polish',
-                  'Chinese',
-                  'Scottish',
-                  'Spanish',
-                  'Irish',
-                  'French',
-                  'Italian',
-                  'Russian',
-                  'Vietnamese',
-                  'Greek',
-                  'Arabic',
-                  'Dutch',
-                  'Korean']
+all_categories = ['Irish',
+ 'Japanese',
+ 'Greek',
+ 'Polish',
+ 'Russian',
+ 'Vietnamese',
+ 'French',
+ 'English',
+ 'Dutch',
+ 'Italian',
+ 'Scottish',
+ 'Portuguese',
+ 'Arabic',
+ 'Spanish',
+ 'Chinese',
+ 'German',
+ 'Czech',
+ 'Korean']
 
 n_categories = len(all_categories)
 

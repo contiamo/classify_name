@@ -5,6 +5,8 @@ import os
 import sys
 import torch
 
+import pandas as pd
+
 from pathlib import PurePath
 from torch.autograd import Variable
 from typing import List, Any
@@ -20,6 +22,7 @@ RNN = utils.RNN
 rnn = RNN(utils.n_letters, utils.n_hidden, utils.n_categories)
 # fill in weights
 rnn.load_state_dict(torch.load(str(PurePath(bundle_root, 'common/char-rnn-classification.pt'))))
+rnn.eval()
 
 def predict(line: str, n_predictions: int=3) -> List[Any]:
     with torch.no_grad():
@@ -44,7 +47,7 @@ def predict(line: str, n_predictions: int=3) -> List[Any]:
     #    value = topv[0][i]
     #    category_index = topi[0][i]
     #    predictions += [(str(value).split('tensor')[1], utils.all_categories[category_index])]
-    predictions.reverse()
+    #predictions.reverse()
     return predictions
         
 
@@ -56,9 +59,14 @@ def handle(input_string: str) -> str:
     else:
         name = str(input_string)
 
-    output = predict(name) 
+    output = (pd.DataFrame(predict(name), columns=['score', 'language'])
+              .sort_values('score', ascending=False)
+              .set_index('score')
+              .squeeze()
+              .to_dict()
+             )
     
-    return json.dumps(dict(output))
+    return json.dumps(output)
 
 
 

@@ -1,0 +1,12 @@
+{
+    "description": "Provide most likely origin language for any given name",
+    "request": {
+        "type": "string"
+    },
+    "response": {
+        "type": "array",
+        "items": {
+            "type": "tuple"
+        }
+    }
+}

@@ -13,8 +13,8 @@ COPY  index_by_nationality-requirements.txt .
 RUN pip install -r index_by_nationality-requirements.txt
 COPY  . . 
 # Switch to non-root user.
-RUN useradd guest
-USER guest
+#RUN useradd guest
+#USER guest
 # Watchdog configuration
 ENV fprocess="python index.py"
 ENV cgi_headers="true"

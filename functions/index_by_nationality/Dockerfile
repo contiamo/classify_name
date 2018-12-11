@@ -12,6 +12,7 @@ COPY  index_by_nationality-requirements.txt .
 # Install required modules.
 RUN pip install -r index_by_nationality-requirements.txt
 COPY  . . 
+COPY common common/
 # Switch to non-root user.
 #RUN useradd guest
 #USER guest

@@ -2,7 +2,12 @@ api_version: 0.0.2
 name: pytorch_name_classification
 edit:
   image: eu.gcr.io/contiamo-prod/datascience-internal-all-deep:latest
+environment:
+  AWS_CONFIG_FILE: /var/openfaas/secrets/aws-config
 functions:
   classify_name:
     lang: dockerfile
     handler: /functions/classify_name
+  index_by_nationality:
+    lang: dockerfile
+    handler: /functions/index_by_nationality

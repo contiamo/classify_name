@@ -4,9 +4,10 @@ __pycache__
 *~
 *.bak
 *.ipynb_checkpoints
-*.parquet
 .vscode
 /packages
 /images
 *.log
 *.nbconvert.ipynb
+.mypy_cache/
+data/

@@ -3,7 +3,7 @@ FROM python:3-slim
 RUN apt-get update \
     && apt-get install -y curl \
     && echo "Pulling watchdog binary from Github." \
-    && curl -sSL https://github.com/openfaas/faas/releases/download/0.9.4/fwatchdog > /usr/bin/fwatchdog \
+    && curl -sSL https://github.com/openfaas-incubator/of-watchdog/releases/download/0.2.3/of-watchdog > /usr/bin/fwatchdog \
     && chmod +x /usr/bin/fwatchdog 
 
 WORKDIR /labs/bundle
@@ -16,9 +16,12 @@ COPY  . .
 RUN useradd guest
 USER guest
 # Watchdog configuration
-ENV fprocess="python3 index.py"
+ENV fprocess="python index.py"
+ENV cgi_headers="true"
+ENV mode="http"
+ENV upstream_url="http://127.0.0.1:5000"
 ENV LABS_BUNDLE_ROOT='/labs/bundle'
-EXPOSE 8080  
+  
 HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
 # Run the watchdog
 CMD ["fwatchdog"]

@@ -4,7 +4,6 @@ __pycache__
 *~
 *.bak
 *.ipynb_checkpoints
-*.parquet
 .vscode
 /packages
 /images

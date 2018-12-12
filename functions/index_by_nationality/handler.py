@@ -62,7 +62,7 @@ default_query = """query metadata {nationalityList, jobList}"""
 def handle(input_json: str) -> str:  
     # parse input
     try:
-        input_dict = json.loads(input_json)
+        input_dict = json.loads(input_json.replace('\n', ''))
     except ValueError as e:
         return 'Input must be json.'    
     # get variables, query

@@ -59,8 +59,17 @@ class Query(graphene.ObjectType):
 schema = graphene.Schema(query=Query, types=[movie])
 default_query = """query metadata {nationalityList, jobList}"""
 
-def handle(query: str=default_query) -> str:    
-    output = schema.execute(query)
+def handle(input_json: str) -> str:  
+    # parse input
+    try:
+        input_dict = json.loads(input_json)
+    except ValueError as e:
+        return 'Input must be json.'    
+    # get variables, query
+    variables = input_dict.get('variables', None)
+    query = input_dict.get('query', '')
+    # execute query
+    output = schema.execute(query, variables=variables )
     # check result for errors
     if not output.errors:
         output = output.data

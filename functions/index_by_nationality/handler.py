@@ -77,7 +77,7 @@ class Query(graphene.ObjectType):
     
     def resolve_crew_list(self, info, nationality, job):     
         top_crew = (joined_table_index_crew_member
-                    .loc[nationality, job]
+                    .loc[[nationality, job]]
                     .dropna(axis='rows')
                     .query('revenue > 1e6')
                     .groupby(['name_'])['revenue']
@@ -91,7 +91,7 @@ class Query(graphene.ObjectType):
     
     def resolve_movie_list(self, info, crew_member_name):
         crew_details = (joined_table_index_crew_detail
-                        .loc[crew_member_name]
+                        .loc[[crew_member_name]]
                         .groupby(['title'])[['revenue']]
                         .sum()
                         .nlargest(5, 'revenue')

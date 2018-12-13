@@ -69,6 +69,7 @@ class Query(graphene.ObjectType):
     
     def resolve_crew_list(self, info, nationality, job):     
         top_crew = (joined_table_index_crew_member
+                    .loc[nationality, job]
                     .dropna(axis='rows')
                     .query('revenue > 1e6')
                     .groupby(['name_'])['revenue']

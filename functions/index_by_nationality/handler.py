@@ -17,20 +17,28 @@ crew = pd.read_parquet(bundle_root / 'common/crew_with_nationality.parquet').sor
 # define metadata
 crew = crew.loc[crew.groupby(level=[0,1]).size()[lambda x:x>100].index]
 nationality_list = crew.index.get_level_values(0).unique()
-job_list = crew.index.get_level_values(1).unique()   
+job_list = crew.index.get_level_values(1).unique() 
+joined_table = movies.join(crew.reset_index().set_index('movie_id'), how='inner')
+joined_table_index_crew_member = joined_table.set_index(['nationality', 'job']).sort_index() .dropna(axis='rows')
+joined_table_index_crew_detail = joined_table.set_index(['name_']).sort_index().dropna(axis='rows')
 
 # output type
 class crew_member(graphene.ObjectType):
-    movie_title = graphene.String(required=True)
     name = graphene.String(required=True)
-    movie_revenue = graphene.Int(required=True)
-    aggregate_revenue = graphene.Int(required=True)
+    aggregate_revenue = graphene.Float(required=True)
+    
+    def __init__(self, row):  
+        self.name = row['name']
+        self.aggregate_revenue = row['aggregate_revenue']
+        
+class crew_detail(graphene.ObjectType):
+    movie_title = graphene.String(required=True)
+    movie_revenue = graphene.Float(required=True)
     
     def __init__(self, row):  
         self.movie_title = row['title']
-        self.name = row['name']
-        self.movie_revenue = row['movie_revenue']
-        self.aggregate_revenue = row['aggregate_revenue']
+        self.movie_revenue = row['revenue']
+    
         
 class Query(graphene.ObjectType):
     
@@ -41,12 +49,13 @@ class Query(graphene.ObjectType):
     job_list = graphene.List(graphene.String,
                              required=True,
                              nationality=graphene.String(default_value='English', required=False ))
-    movie_list = graphene.List(crew_member,
+    crew_list = graphene.List(crew_member,
                                nationality = graphene.String(default_value='English', required=False),
                                job = graphene.String(default_value='Director', required=False)
                               )
-    
-   
+    movie_list = graphene.List(crew_detail,
+                               crew_member_name = graphene.String(required=True)
+                              )
                         
     def resolve_nationality_list(self, info, job):
         if job:
@@ -58,26 +67,31 @@ class Query(graphene.ObjectType):
             job_list = crew.xs(nationality, level=0).index.unique().tolist()
         return job_list    
     
-    def resolve_movie_list(self, info, nationality, job):     
-        movie_info = (movies
-              .join(crew.loc[(nationality, job)].reset_index().set_index('movie_id'), how='inner')
-              .dropna(axis='rows')
-              .query('revenue > 1e6')
-             )  
-        top_crew = movie_info.groupby(['name_','title'])['revenue'].sum()
-        top_crew = (top_crew
-                 .reset_index()
-                 .set_index('name_')
-                 .join(top_crew.groupby(level=0).sum().to_frame('aggregate_revenue').nlargest(5, 'aggregate_revenue'), how='inner')
-                 .reset_index()
-                 .sort_values(['aggregate_revenue', 'revenue'], ascending=[False,False])
-                 .rename(columns={'name_':'name', 'revenue':'movie_revenue'})
-                # .assign(movie_revenue = lambda s:(s['movie_revenue']/1e6).astype(int))
-                # .assign(aggregate_revenue = lambda s:(s['aggregate_revenue']/1e6).astype(int))
-                )
+    def resolve_crew_list(self, info, nationality, job):     
+        top_crew = (joined_table_index_crew_member
+                    .dropna(axis='rows')
+                    .query('revenue > 1e6')
+                    .groupby(['name_'])['revenue']
+                    .sum()
+                    .nlargest(5)
+                    .to_frame('aggregate_revenue')
+                    .reset_index()
+                    .rename(columns={'name_':'name'})
+                   )    
         return [crew_member(row) for _, row in top_crew.iterrows()]        
     
-schema = graphene.Schema(query=Query)
+    def resolve_movie_list(self, info, crew_member_name):
+        crew_details = (joined_table_index_crew_detail
+                        .loc[crew_member_name]
+                        .groupby(['title'])[['revenue']]
+                        .sum()
+                        .nlargest(5, 'revenue')
+                        .reset_index()
+                       )
+        return [crew_detail(row) for _, row in crew_details.iterrows()]
+        
+    
+schema = graphene.Schema(query=Query)#, types=[crew_member, crew_detail])
 
 
 def handle(input_json: str) -> str:  

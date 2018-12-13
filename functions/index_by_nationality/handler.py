@@ -12,8 +12,16 @@ from typing import List, Any
 bundle_root = pathlib.Path(os.environ['LABS_BUNDLE_ROOT'])
 sys.path.append(str(bundle_root / 'common'))
 # load data
-movies = pd.read_parquet(bundle_root / 'common/movies_metadata.parquet').drop_duplicates(subset=['id']).sort_values('id').set_index('id')
-crew = pd.read_parquet(bundle_root / 'common/crew_with_nationality.parquet').sort_values(['nationality','job']).set_index(['nationality','job']) 
+movies = (pd
+          .read_parquet(bundle_root / 'common/movies_metadata.parquet' ,columns=['title', 'revenue', 'id'])
+          .drop_duplicates(subset=['id'])
+          .sort_values('id')
+          .set_index('id'))
+crew = (pd
+        .read_parquet(bundle_root / 'common/crew_with_nationality.parquet', columns=['movie_id', 'nationality', 'job', 'name_'])
+        .sort_values(['nationality','job'])
+        .set_index(['nationality','job']) 
+       )
 # define metadata
 crew = crew.loc[crew.groupby(level=[0,1]).size()[lambda x:x>100].index]
 nationality_list = crew.index.get_level_values(0).unique()

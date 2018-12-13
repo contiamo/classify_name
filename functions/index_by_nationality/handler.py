@@ -77,7 +77,7 @@ class Query(graphene.ObjectType):
                 )
         return [crew_member(row) for _, row in top_crew.iterrows()]        
     
-schema = graphene.Schema(query=Query, types=[movie])
+schema = graphene.Schema(query=Query)
 
 
 def handle(input_json: str) -> str:  

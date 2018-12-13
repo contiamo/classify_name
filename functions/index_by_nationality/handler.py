@@ -15,6 +15,7 @@ sys.path.append(str(bundle_root / 'common'))
 movies = pd.read_parquet(bundle_root / 'common/movies_metadata.parquet').drop_duplicates(subset=['id']).sort_values('id').set_index('id')
 crew = pd.read_parquet(bundle_root / 'common/crew_with_nationality.parquet').sort_values(['nationality','job']).set_index(['nationality','job']) 
 # define metadata
+crew = crew.loc[crew.groupby(level=[0,1]).size()[lambda x:x>100].index]
 nationality_list = crew.index.get_level_values(0).unique()
 job_list =crew.index.get_level_values(1).unique()   
 
@@ -29,8 +30,12 @@ class movie(graphene.ObjectType):
 class Query(graphene.ObjectType):
     
     ## graphene 
-    nationality_list = graphene.List(graphene.String, required=True, )
-    job_list = graphene.List(graphene.String, required=True)   
+    nationality_list = graphene.List(graphene.String,
+                                     required=True,
+                                     job=graphene.String(default_value='Director', required=False ))
+    job_list = graphene.List(graphene.String,
+                             required=True,
+                             nationality=graphene.String(default_value='English', required=False ))
     movie_list = graphene.List(movie,
                                nationality = graphene.String(default_value='English', required=False),
                                job = graphene.String(default_value='Director', required=False)
@@ -38,10 +43,14 @@ class Query(graphene.ObjectType):
     
    
                         
-    def resolve_nationality_list(self, info):
+    def resolve_nationality_list(self, info, job):
+        if job:
+            nationality_list = crew.xs(job, level=1).index.unique().tolist()
         return nationality_list
     
-    def resolve_job_list(self, info):
+    def resolve_job_list(self, info, nationality):
+        if nationality:
+            job_list = crew.xs(nationality, level=0).index.unique().tolist()
         return job_list    
     
     def resolve_movie_list(self, info, nationality, job):     
@@ -57,7 +66,7 @@ class Query(graphene.ObjectType):
         return [movie(row) for _, row in movie_info.iterrows()]        
     
 schema = graphene.Schema(query=Query, types=[movie])
-default_query = """query metadata {nationalityList, jobList}"""
+
 
 def handle(input_json: str) -> str:  
     # parse input
@@ -70,8 +79,11 @@ def handle(input_json: str) -> str:
     query = input_dict.get('query', '').replace('\\n', '').replace('\n', '')
     # execute query
     output = schema.execute(query, variables=variables )
-    
-    return json.dumps({'data': output.data, 'errors': output.errors})
+    if output.errors:
+        errors = [str(err) for err in output.errors]
+    else:
+        errors = None
+    return json.dumps({'data': output.data, 'errors': errors})
 
 
 

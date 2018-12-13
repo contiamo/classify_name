@@ -14,25 +14,24 @@ n_hidden = 128
 
 # Build the category_lines dictionary, a list of names per language
 
-all_categories = ['Irish',
+all_categories = ['German',
+ 'English',
+ 'Czech',
+ 'Portuguese',
  'Japanese',
- 'Greek',
  'Polish',
+ 'Chinese',
+ 'Scottish',
+ 'Spanish',
+ 'Irish',
+ 'French',
+ 'Italian',
  'Russian',
  'Vietnamese',
- 'French',
- 'English',
- 'Dutch',
- 'Italian',
- 'Scottish',
- 'Portuguese',
+ 'Greek',
  'Arabic',
- 'Spanish',
- 'Chinese',
- 'German',
- 'Czech',
+ 'Dutch',
  'Korean']
-
 n_categories = len(all_categories)
 
 # Just return an output given a line
@@ -67,8 +66,7 @@ class RNN(nn.Module):
         return torch.zeros(1, self.hidden_size)
 
 
-# initialize model schema
-rnn = RNN(n_letters, n_hidden, n_categories)
+
 
 
 def lineToTensor(line):

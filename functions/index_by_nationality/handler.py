@@ -70,13 +70,8 @@ def handle(input_json: str) -> str:
     query = input_dict.get('query', '').replace('\\n', '').replace('\n', '')
     # execute query
     output = schema.execute(query, variables=variables )
-    # check result for errors
-    if not output.errors:
-        output = output.data
-    else:
-        output = str(output.errors[0])
     
-    return json.dumps(output)
+    return json.dumps({'data': output.data, 'errors': output.errors})
 
 
 

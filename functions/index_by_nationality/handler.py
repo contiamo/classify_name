@@ -64,7 +64,7 @@ def handle(input_json: str) -> str:
     try:
         input_dict = json.loads(input_json)
     except ValueError as e:
-        return 'Input must be json.'    
+        return json.dumps({'data': None, 'errors': 'input must be json'}) 
     # get variables, query
     variables = input_dict.get('variables', None)
     query = input_dict.get('query', '').replace('\\n', '').replace('\n', '')

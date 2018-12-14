@@ -124,8 +124,7 @@ def get_name_nationality(name: str) -> pd.DataFrame:
 
 
 ## Pantheon query
-endpoint = 'https://pantheon.cloud.contiamo.com/contiamo-next/catalogs/73399930-b7b6-5206-82f8-40fad7134ccf/savedQueries/f89a4580-fed1-11e8-b5b1-1b599c08eaab/execute'
-headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer fc0032234bbbb447a08fb1e6df6b494fb165806f837df07dd6d07cc09e3c2f09'}
+headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer 823af77daa9795d08298ccaaecf142c4fdc40ff5a1e680112d6ebfbeb9e60c85'}
 
 def query_pantheon(endpoint: str) -> pd.DataFrame:
     r = json.loads(requests.post(endpoint, data='{}', headers=headers).text)
